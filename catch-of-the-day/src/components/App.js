@@ -4,12 +4,39 @@ import Order from "./Order";
 import Inventory from "./Inventory";
 import sampleFishes from "../sample-fishes";
 import Fish from "./Fish";
+import base from "../base";
 
 class App extends React.Component {
   state = {
     fishes: {},
     order: {}
   };
+
+  componentDidMount() {
+    const { params } = this.props.match;
+    this.ref = base.syncState(`${params.storeId}/fishes`, {
+      context: this,
+      state: "fishes"
+    });
+
+    const localStorageRef = localStorage.getItem(params.storeId);
+    if (localStorageRef) {
+      this.setState({
+        order: JSON.parse(localStorageRef)
+      });
+    }
+  }
+
+  componentDidUpdate() {
+    localStorage.setItem(
+      this.props.match.params.storeId,
+      JSON.stringify(this.state.order)
+    );
+  }
+
+  componentWillUnmount() {
+    base.removeBinding(this.ref);
+  }
 
   addFish = fish => {
     const fishes = { ...this.state.fishes };
@@ -21,9 +48,17 @@ class App extends React.Component {
     });
   };
 
+  updateFish = (key, updatedFish) => {
+    const fishes = { ...this.state.fishes };
+    fishes[key] = updatedFish;
+    this.setState({
+      fishes
+    });
+  };
+
   addToOrder = key => {
     const order = { ...this.state.order };
-    console.log(key)
+    console.log(key);
     order[key] = order[key] + 1 || 1;
 
     this.setState({
@@ -45,11 +80,11 @@ class App extends React.Component {
           <ul className="fishes">
             {Object.keys(this.state.fishes).map(key => (
               <Fish
-               key={key}
-               index={key}
+                key={key}
+                index={key}
                 details={this.state.fishes[key]}
-                 addToOrder={this.addToOrder}
-                 />
+                addToOrder={this.addToOrder}
+              />
             ))}
           </ul>
         </div>
@@ -57,6 +92,8 @@ class App extends React.Component {
         <Inventory
           addFish={this.addFish}
           loadSampleFishes={this.loadSampleFishes}
+          updateFish={this.updateFish}
+          fishes={this.state.fishes}
         />
       </div>
     );
