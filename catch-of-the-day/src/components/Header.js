@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 // Arrow function
 // Implicit Return
@@ -12,10 +13,14 @@ const Header = props => (
       </span>
       Day
     </h1>
-    <h3 className="tagline">
+    <h3 className={"tagline"}>
       <span>{props.tagline}</span>
     </h3>
   </header>
 );
+
+Header.propTypes = {
+  tagline:PropTypes.string.isRequired
+}
 
 export default Header;
